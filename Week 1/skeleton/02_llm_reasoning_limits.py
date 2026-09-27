@@ -57,7 +57,7 @@ def demo_reasoning(client):
 
     print("Attempt 2 — chain-of-thought:")
     # TODO 1: build the chain-of-thought prompt (ask the model to reason step by step)
-    cot_prompt = ""  # TODO 1
+    cot_prompt = puzzle + "\nLet's think step by step, tracking every box after each move."
     if not cot_prompt:
         print("(Complete TODO 1 to run the chain-of-thought version.)\n")
     else:

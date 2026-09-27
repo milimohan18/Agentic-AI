@@ -60,12 +60,14 @@ def run_agent(goal: str):
 
         # 1) OBSERVE
         # TODO 1: build `prompt` from the goal + history (ask for the next step)
-        prompt = ""  # TODO 1
+        prompt = f"Task: {goal}\n{history}\nWhat is your next step?"
 
         # 2) REASON
         # TODO 2: call client.get_completion(prompt, system_message=SYSTEM,
         #         temperature=0.0, max_tokens=200) and keep the FIRST line in `line`
-        line = ""  # TODO 2
+        response = client.get_completion(prompt, system_message=SYSTEM,
+                                         temperature=0.0, max_tokens=200)
+        line = response.strip().splitlines()[0].strip() if response and response.strip() else ""
         print(f"[step {step}] {line}")
 
         # 4) EVALUATE (part 1): stop if the agent gave a FINAL answer
@@ -78,12 +80,15 @@ def run_agent(goal: str):
             expr = match.group(1)
             # TODO 3: call calculator(expr) safely; put the result (or an error
             #         string) into `result`
-            result = None  # TODO 3
+            try:
+                result = calculator(expr)
+            except Exception as e:
+                result = f"error: {e}"
             print(f"        observation: calculator[{expr}] = {result}")
 
             # 4) EVALUATE (part 2): record the observation so the next loop sees it
             # TODO 4: append the result to `history` so the agent remembers it
-            pass  # TODO 4
+            history += f"\nYou ran calculator[{expr}] and got {result}."
         else:
             history += "\n(No valid action found; reply with ACTION: or FINAL:.)"
 

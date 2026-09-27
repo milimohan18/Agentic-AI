@@ -82,21 +82,32 @@ example = AgentBlueprint(
 # YOUR BLUEPRINT — TODO: design an agent of your own
 # ---------------------------------------------------------------------------
 my_agent = AgentBlueprint(
-    name="xav_bot",
-    goal="correct assignment of my students",
-    done_when="It's complete when all assignments of my students are corrected and feedback is provided.",
+    name="Weekly Assignment Tracker Agent",
+    goal=("Every Sunday evening, collect all course assignments due in the next 7 days, "
+          "check which ones I've already pushed to GitHub, and send me one prioritised "
+          "to-do list for the week."),
+    done_when=("A single to-do message has been sent that lists EVERY assignment due in the "
+               "next 7 days, each marked DONE (a matching commit exists) or PENDING, sorted by "
+               "due date — or a message saying nothing is due this week."),
     tools=[
-        "ACces to internet",
-        "PDF reader",
+        "read_course_readme(week) -> list of {task, due_date} from the week's README / action items",
+        "list_github_commits(repo, since) -> list of {message, files_changed, date}",
+        "calendar_lookup(start, end) -> my busy slots for the week (to suggest when to work)",
+        "send_message(channel, text) -> delivery confirmation (email or WhatsApp)",
     ],
     memory=[
-        "List of students and their assignments",
-        "Feedback provided to each student in previous sessions",
+        "Which course repo(s) and branch to check",
+        "Assignments found this run and their DONE/PENDING status",
+        "Last week's list, so carried-over PENDING items are flagged as overdue",
+        "My preferred delivery channel and time",
     ],
     actions=[
-        "Review each student's assignment",
-        "Provide feedback and corrections",
-        "Notify me when all assignments are corrected and feedback is provided",
+        "Read the current and next week's README to collect tasks and due dates",
+        "Fetch commits pushed since the start of the week",
+        "Match each task to a commit (by file name / commit message); mark DONE or PENDING",
+        "Compare with last week's list and flag anything overdue",
+        "Look up free calendar slots and attach a suggested time to each PENDING task",
+        "Sort by due date and send the to-do list; stop once delivery is confirmed",
     ],
 )
 

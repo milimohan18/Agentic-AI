@@ -67,8 +67,11 @@ def safe_calc(expression: str):
             Hint: tree = ast.parse(expression, mode="eval"); then _eval_node(tree.body)
             Wrap it so a bad expression returns "error: ..." instead of crashing.
     """
-    # TODO 1: replace the stub below
-    return "error: safe_calc not implemented yet"
+    try:
+        tree = ast.parse(expression, mode="eval")
+        return _eval_node(tree.body)
+    except Exception as e:
+        return f"error: {e}"
 
 
 def dispatch(tool: str, arg: str):
@@ -78,8 +81,11 @@ def dispatch(tool: str, arg: str):
         "calc"         -> safe_calc(arg)
         anything else  -> "error: unknown tool"
     """
-    # TODO 2
-    return "error: dispatch not implemented yet"
+    if tool == "price_lookup":
+        return price_lookup(arg)
+    if tool == "calc":
+        return safe_calc(arg)
+    return "error: unknown tool"
 
 
 SYSTEM = """You are a reasoning agent with TWO tools:
@@ -112,7 +118,14 @@ def run_agent(goal: str):
         # TODO 3: match a generic  tool[arg]  (e.g. price_lookup[widget] or calc[3*25]),
         #         call dispatch(tool, arg), print the observation and append it to history.
         #         If no valid action is found, nudge the model to use ACTION:/FINAL:.
-        pass  # TODO 3
+        match = re.search(r"(\w+)\[(.+?)\]", line)
+        if match:
+            tool, arg = match.group(1), match.group(2)
+            result = dispatch(tool, arg)
+            print(f"        observation: {tool}[{arg}] = {result}")
+            history += f"\nYou ran {tool}[{arg}] and got {result}."
+        else:
+            history += "\n(No valid action found; reply with ACTION: or FINAL:.)"
 
     return "Stopped: reached the step limit."
 

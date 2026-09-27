@@ -55,8 +55,17 @@ def reflect(client, goal, answer):
         REVISE: <one sentence on what is wrong>
     Keep temperature=0.0.
     """
-    # TODO 1: build a critique prompt and return client.get_completion(...)
-    return "CONFIRM"   # <- replace this stub
+    prompt = (
+        f"Task: {goal}\n"
+        f"Proposed final answer: {answer}\n\n"
+        "Check the answer carefully. Is it correct and does it fully answer the task?\n"
+        "Reply with EXACTLY one line:\n"
+        "  CONFIRM\n"
+        "or\n"
+        "  REVISE: <one sentence on what is wrong>"
+    )
+    return client.get_completion(prompt, system_message="You are a strict reviewer.",
+                                 temperature=0.0, max_tokens=600) or ""
 
 
 def run_agent(goal: str):
@@ -73,11 +82,14 @@ def run_agent(goal: str):
 
         if line.upper().startswith("FINAL:"):
             answer = line.split(":", 1)[1].strip()
-            # TODO 2: reflect before you trust it.
-            #   verdict = reflect(client, goal, answer)
-            #   if it starts with CONFIRM -> return answer
-            #   else -> add the critique to history and CONTINUE the loop
-            return answer   # <- replace: only return after a CONFIRM
+            verdict = reflect(client, goal, answer).strip()
+            verdict = verdict.splitlines()[0].strip() if verdict else ""
+            print(f"        reflection: {verdict}")
+            if verdict.upper().startswith("CONFIRM"):
+                return answer
+            history += (f"\nYou proposed FINAL: {answer}, but a reviewer said: {verdict} "
+                        "Fix the problem, then give a new FINAL answer.")
+            continue
 
         match = re.search(r"calculator\[(.+?)\]", line)
         if match:

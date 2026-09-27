@@ -31,15 +31,14 @@ def calculator(expression: str):
             and return the numeric result.
             Hint: eval(expression, {"__builtins__": {}}, {}) keeps it simple & safe-ish.
     """
-    # TODO 2: replace the line below with a real evaluation
-    return None
+    return eval(expression, {"__builtins__": {}}, {})
 
 
 def main():
     client = LLMClient()
 
     # TODO 1: Write a multi-step arithmetic task, e.g. an 18.5% share plus a fixed amount.
-    task = ""  # TODO 1: e.g. "What is 18.5% of 2480, plus 365? Give only the number."
+    task = "What is 18.5% of 2480, plus 365? Give only the number."
 
     if not task:
         print("Please complete TODO 1 (write the `task`).")
